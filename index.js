@@ -37,7 +37,15 @@ function inserisciPedina(colonna) {
             griglia[i][colonna] = turnoRosso ? RED : YELLOW;
             let cella = document.getElementById(`cella${i}${colonna}`);
             cella.style.backgroundColor = turnoRosso ? RED : YELLOW;
-            
+
+            if (controlloVittoria(i, colonna)) {
+                setTimeout(() => {
+                    alert(`Giocatore ${turnoRosso ? "Rosso" : "Giallo"} ha vinto!`);
+                    window.location.reload();
+                }, 100);
+                return;
+            }
+
             turnoRosso = !turnoRosso;
             aggiornaTurno();
             return;
@@ -47,7 +55,9 @@ function inserisciPedina(colonna) {
 }
 
 function aggiornaTurno() {
-    document.getElementById("nextPlayer").textContent = turnoRosso ;
+    const nextPlayer = document.getElementById("nextPlayer");
+    nextPlayer.textContent = turnoRosso ? "Rosso" : "Giallo";
+    nextPlayer.style.color = turnoRosso ? RED : YELLOW;
 }
 
 function controlloVittoria(row, col) {
@@ -55,10 +65,10 @@ function controlloVittoria(row, col) {
     if (!colore) return false;
 
     return (
-        controllaDirezione(row, col, 1, 0) || 
-        controllaDirezione(row, col, 0, 1) || 
-        controllaDirezione(row, col, 1, 1) || 
-        controllaDirezione(row, col, 1, -1)   
+        controllaDirezione(row, col, 1, 0) || // Controlla orizzontale
+        controllaDirezione(row, col, 0, 1) || // Controlla verticale
+        controllaDirezione(row, col, 1, 1) || // Controlla diagonale /
+        controllaDirezione(row, col, 1, -1)   // Controlla diagonale \
     );
 }
 
