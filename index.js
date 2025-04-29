@@ -7,85 +7,142 @@ const YELLOW = "rgb(255, 255, 0)";
 const RED = "rgb(255, 0, 0)";
 
 let turnoRosso = true;
-let griglia = Array.from({ length: RIGHE }, () => Array(COLONNE).fill(null));
+//let griglia = Array.from({ length: RIGHE }, () => Array(COLONNE).fill(null));
 
 window.onload = function () {
-    creaTabella();
+    caricaMatrice();
     aggiornaTurno();
 };
 
-function creaTabella() {
-    let wrapper = document.getElementById("wrapper");
-    wrapper.innerHTML = ""; // Pulisce la griglia prima di ricrearla
-
+function caricaMatrice() {
+    const wrapper = document.querySelector("#wrapper");
     for (let i = 0; i < RIGHE; i++) {
         for (let j = 0; j < COLONNE; j++) {
-            let cella = document.createElement("div");
-            cella.setAttribute("id", `cella${i}${j}`);
-            cella.classList.add("pedina");
-            cella.dataset.row = i;
-            cella.dataset.col = j;
-            cella.addEventListener("click", () => inserisciPedina(j));
-            wrapper.appendChild(cella);
+            const div = document.createElement("div");
+            div.classList.add("pedina");
+            div.id = `div-${i}-${j}`;
+            wrapper.appendChild(div);
+            if (i === RIGHE - 1) { // Solo l'ultima riga è cliccabile inizialmente
+                div.addEventListener("click", pedinaClick);
+            }
         }
     }
 }
 
-function inserisciPedina(colonna) {
-    for (let i = RIGHE - 1; i >= 0; i--) {
-        if (!griglia[i][colonna]) {
-            griglia[i][colonna] = turnoRosso ? RED : YELLOW;
-            let cella = document.getElementById(`cella${i}${colonna}`);
-            cella.style.backgroundColor = turnoRosso ? RED : YELLOW;
+function pedinaClick() {
+    const turno = recuperaTurno();
+    if (turno === "G") {
+        this.style.backgroundColor = YELLOW;
+    } else {
+        this.style.backgroundColor = RED;
+    }
+    this.removeEventListener("click", pedinaClick);
 
-            if (controlloVittoria(i, colonna)) {
-                setTimeout(() => {
-                    alert(`Giocatore ${turnoRosso ? "Rosso" : "Giallo"} ha vinto!`);
-                    window.location.reload();
-                }, 100);
-                return;
-            }
+    const rSUp = parseInt(this.id.split("-")[1]) - 1;
+    const cSUp = parseInt(this.id.split("-")[2]);
 
-            turnoRosso = !turnoRosso;
-            aggiornaTurno();
-            return;
+    // Se esiste una cella superiore, abilita il click
+    if (rSUp >= 0) {
+        const cellaSup = document.getElementById(`div-${rSUp}-${cSUp}`);
+        if (cellaSup) {
+            cellaSup.addEventListener("click", pedinaClick);
         }
     }
-    alert("Colonna piena! Scegli un'altra colonna.");
+
+    aggiornaTurno();
+}
+
+function recuperaTurno() {
+    const nextPlayer = document.getElementById("nextPlayer");
+    if (nextPlayer.style.backgroundColor === YELLOW) {
+        return "G";
+    } else {
+        return "R";
+    }
 }
 
 function aggiornaTurno() {
     const nextPlayer = document.getElementById("nextPlayer");
-    nextPlayer.textContent = turnoRosso ? "Rosso" : "Giallo";
-    nextPlayer.style.color = turnoRosso ? RED : YELLOW;
+    if (nextPlayer.style.backgroundColor === YELLOW) {
+        nextPlayer.style.backgroundColor = RED;
+    } else {
+        nextPlayer.style.backgroundColor = YELLOW;
+    }
 }
 
-function controlloVittoria(row, col) {
-    let colore = griglia[row][col];
-    if (!colore) return false;
+    function creaTabella() {
+        /*  let wrapper = document.getElementById("wrapper");
+          wrapper.innerHTML = ""; // Pulisce la griglia prima di ricrearla
+      
+          for (let i = 0; i < RIGHE; i++) {
+              for (let j = 0; j < COLONNE; j++) {
+                  let cella = document.createElement("div");
+                  cella.setAttribute("id", `cella${i}${j}`);
+                  cella.classList.add("pedina");
+                  cella.dataset.row = i;
+                  cella.dataset.col = j;
+                  cella.addEventListener("click", () => inserisciPedina(j));
+                  wrapper.appendChild(cella);
+              }
+          }*/
 
-    return (
-        controllaDirezione(row, col, 1, 0) || // Controlla orizzontale
-        controllaDirezione(row, col, 0, 1) || // Controlla verticale
-        controllaDirezione(row, col, 1, 1) || // Controlla diagonale /
-        controllaDirezione(row, col, 1, -1)   // Controlla diagonale \
-    );
-}
-
-function controllaDirezione(row, col, dRow, dCol) {
-    let colore = griglia[row][col];
-    let conteggio = 1;
-
-    for (let dir = -1; dir <= 1; dir += 2) {
-        let r = row + dRow * dir;
-        let c = col + dCol * dir;
-
-        while (r >= 0 && r < RIGHE && c >= 0 && c < COLONNE && griglia[r][c] === colore) {
-            conteggio++;
-            r += dRow * dir;
-            c += dCol * dir;
-        }
     }
 
-    return conteggio >= 4;
-}
+    function inserisciPedina(colonna) {
+        /*  for (let i = RIGHE - 1; i >= 0; i--) {
+              if (!griglia[i][colonna]) {
+                  griglia[i][colonna] = turnoRosso ? RED : YELLOW;
+                  let cella = document.getElementById(`cella${i}${colonna}`);
+                  cella.style.backgroundColor = turnoRosso ? RED : YELLOW;
+      
+                  if (controlloVittoria(i, colonna)) {
+                      setTimeout(() => {
+                          alert(`Giocatore ${turnoRosso ? "Rosso" : "Giallo"} ha vinto!`);
+                          window.location.reload();
+                      }, 100);
+                      return;
+                  }
+      
+                  turnoRosso = !turnoRosso;
+                  aggiornaTurno();
+                  return;
+              }
+          }
+          alert("Colonna piena! Scegli un'altra colonna.");
+      }
+      
+      function aggiornaTurno() {
+          const nextPlayer = document.getElementById("nextPlayer");
+          nextPlayer.textContent = turnoRosso ? "Rosso" : "Giallo";
+          nextPlayer.style.color = turnoRosso ? RED : YELLOW;
+      }
+      
+      function controlloVittoria(row, col) {
+          let colore = griglia[row][col];
+          if (!colore) return false;
+      
+          return (
+              controllaDirezione(row, col, 1, 0) || // Controlla orizzontale
+              controllaDirezione(row, col, 0, 1) || // Controlla verticale
+              controllaDirezione(row, col, 1, 1) || // Controlla diagonale /
+              controllaDirezione(row, col, 1, -1)   // Controlla diagonale \
+          );
+      }
+      
+      function controllaDirezione(row, col, dRow, dCol) {
+          let colore = griglia[row][col];
+          let conteggio = 1;
+      
+          for (let dir = -1; dir <= 1; dir += 2) {
+              let r = row + dRow * dir;
+              let c = col + dCol * dir;
+      
+              while (r >= 0 && r < RIGHE && c >= 0 && c < COLONNE && griglia[r][c] === colore) {
+                  conteggio++;
+                  r += dRow * dir;
+                  c += dCol * dir;
+              }
+          }
+      
+          return conteggio >= 4;*/
+    }
